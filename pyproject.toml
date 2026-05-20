@@ -14,6 +14,7 @@ dependencies = [
 [project.scripts]
 fetch = "arigato.services.fetch:main"
 chart = "arigato.services.chart:main"
+following = "arigato.services.following:main"
 
 [build-system]
 requires = ["setuptools>=69"]
