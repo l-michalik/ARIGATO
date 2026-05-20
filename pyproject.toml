@@ -15,6 +15,7 @@ dependencies = [
 fetch = "arigato.services.fetch:main"
 chart = "arigato.services.chart:main"
 following = "arigato.services.following:main"
+four-ema = "arigato.services.four_ema:main"
 
 [build-system]
 requires = ["setuptools>=69"]
