@@ -68,11 +68,6 @@ def default_parquet_path(symbol: str) -> Path:
     return DEFAULT_DATA_DIR / stem / "data.parquet"
 
 
-def default_chart_path(symbol: str) -> Path:
-    stem = _symbol_stem(symbol)
-    return Path("results") / stem / "chart.png"
-
-
 def download_symbol_history(
     symbol: str,
     start_date: str = DEFAULT_START_DATE,
