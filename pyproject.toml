@@ -16,6 +16,7 @@ fetch = "arigato.services.fetch:main"
 chart = "arigato.services.chart:main"
 following = "arigato.services.following:main"
 four-ema = "arigato.services.four_ema:main"
+donchian-breakout = "arigato.services.donchian_breakout:main"
 
 [build-system]
 requires = ["setuptools>=69"]

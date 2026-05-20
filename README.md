@@ -9,4 +9,5 @@ uv run fetch sp500
 uv run chart sp500
 uv run following sp500 --top 10
 uv run four-ema sp500 --top 10
+uv run donchian-breakout sp500 --top 10
 ```
