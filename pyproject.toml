@@ -12,8 +12,8 @@ dependencies = [
 ]
 
 [project.scripts]
-arigato-download-sp500 = "arigato.symbols.sp500.download:main"
-arigato-sp500-chart = "arigato.symbols.sp500.chart:main"
+fetch = "arigato.fetch:main"
+chart = "arigato.chart:main"
 
 [build-system]
 requires = ["setuptools>=69"]

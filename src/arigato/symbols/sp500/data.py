@@ -7,9 +7,10 @@ from typing import Final
 
 import pandas as pd
 
+DEFAULT_SYMBOL: Final[str] = "sp500"
 DEFAULT_TICKER: Final[str] = "^GSPC"
 DEFAULT_START_DATE: Final[str] = "2016-01-01"
-DEFAULT_OUTPUT_PATH: Final[Path] = Path("data") / "sp500.parquet"
+DEFAULT_DATA_DIR: Final[Path] = Path("data")
 
 
 def _normalize_column_name(column: object) -> str:
@@ -51,41 +52,64 @@ def normalize_columns(frame: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def download_sp500_history(
-    ticker: str = DEFAULT_TICKER,
+def _symbol_stem(symbol: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", symbol.strip().lower()).strip("_")
+
+
+def _symbol_to_ticker(symbol: str) -> str:
+    if symbol != DEFAULT_SYMBOL:
+        raise ValueError(f"Unsupported symbol {symbol!r}. Only {DEFAULT_SYMBOL!r} is supported.")
+    return DEFAULT_TICKER
+
+
+def default_parquet_path(symbol: str) -> Path:
+    return DEFAULT_DATA_DIR / f"{_symbol_stem(symbol)}.parquet"
+
+
+def default_chart_path(symbol: str) -> Path:
+    return DEFAULT_DATA_DIR / f"{_symbol_stem(symbol)}.png"
+
+
+def download_symbol_history(
+    symbol: str,
     start_date: str = DEFAULT_START_DATE,
 ) -> pd.DataFrame:
     import yfinance as yf
 
     data = yf.download(
-        ticker,
+        _symbol_to_ticker(symbol),
         start=start_date,
         auto_adjust=True,
         progress=False,
     )
 
     if data.empty:
-        raise RuntimeError(f"No data returned for ticker {ticker!r}.")
+        raise RuntimeError(f"No data returned for symbol {symbol!r}.")
 
     return normalize_columns(data.reset_index())
 
 
-def save_to_parquet(frame: pd.DataFrame, output_path: Path = DEFAULT_OUTPUT_PATH) -> Path:
+def save_to_parquet(frame: pd.DataFrame, output_path: Path) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     normalize_columns(frame).to_parquet(output_path, index=False)
     return output_path
 
 
-def load_sp500_data(parquet_path: Path = DEFAULT_OUTPUT_PATH) -> pd.DataFrame:
+def load_symbol_data(
+    symbol: str,
+    parquet_path: Path | None = None,
+    start_date: str = DEFAULT_START_DATE,
+) -> pd.DataFrame:
+    path = parquet_path or default_parquet_path(symbol)
+
     try:
-        frame = pd.read_parquet(parquet_path)
+        frame = pd.read_parquet(path)
     except Exception:
-        frame = download_sp500_history()
-        save_to_parquet(frame, parquet_path)
+        frame = download_symbol_history(symbol, start_date)
+        save_to_parquet(frame, path)
 
     frame = normalize_columns(frame)
 
     if "date" in frame.columns:
         frame["date"] = pd.to_datetime(frame["date"])
     return frame
-
