@@ -15,9 +15,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from arigato.charting.base import ChartContext, ChartStrategy
+from arigato.charting.base import ChartContext
 
-DEFAULT_CHART_PATH: Final[Path] = Path("data") / "sp500.png"
 DEFAULT_FIGSIZE: Final[tuple[int, int]] = (12, 6)
 DEFAULT_DPI: Final[int] = 150
 
@@ -39,16 +38,23 @@ def _build_context(frame: pd.DataFrame) -> ChartContext:
 
 def render_chart(
     frame: pd.DataFrame,
-    strategy: ChartStrategy,
-    output_path: Path = DEFAULT_CHART_PATH,
+    output_path: Path,
+    title: str = "Close since 2016",
+    xlabel: str = "Date",
+    ylabel: str = "Close",
 ) -> Path:
     context = _build_context(frame)
 
     fig, ax = plt.subplots(figsize=DEFAULT_FIGSIZE, dpi=DEFAULT_DPI)
-    strategy.render(ax, context)
-    ax.set_title(strategy.title)
-    ax.set_xlabel(strategy.xlabel)
-    ax.set_ylabel(strategy.ylabel)
+    ax.plot(
+        context.frame[context.date_column],
+        context.frame[context.value_column],
+        color="#0f766e",
+        linewidth=1.4,
+    )
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
     ax.grid(True, alpha=0.25)
     fig.autofmt_xdate()
     fig.tight_layout()

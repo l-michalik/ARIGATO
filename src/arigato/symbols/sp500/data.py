@@ -89,8 +89,3 @@ def load_sp500_data(parquet_path: Path = DEFAULT_OUTPUT_PATH) -> pd.DataFrame:
         frame["date"] = pd.to_datetime(frame["date"])
     return frame
 
-
-def main() -> None:
-    frame = download_sp500_history()
-    output_path = save_to_parquet(frame)
-    print(f"Saved {len(frame)} rows to {output_path}")
