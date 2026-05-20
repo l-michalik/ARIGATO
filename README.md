@@ -9,5 +9,5 @@ uv run fetch sp500
 uv run chart sp500
 ```
 
-Domyślnie dane trafiają do `data/sp500.parquet`.
-Wykres trafia do `data/sp500.png`.
+Domyślnie dane trafiają do `database/sp500/data.parquet`.
+Wykres trafia do `results/sp500/chart.png`.

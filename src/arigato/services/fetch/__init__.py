@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import ast
 import re
 from pathlib import Path
@@ -10,7 +11,7 @@ import pandas as pd
 DEFAULT_SYMBOL: Final[str] = "sp500"
 DEFAULT_TICKER: Final[str] = "^GSPC"
 DEFAULT_START_DATE: Final[str] = "2016-01-01"
-DEFAULT_DATA_DIR: Final[Path] = Path("data")
+DEFAULT_DATA_DIR: Final[Path] = Path("database")
 
 
 def _normalize_column_name(column: object) -> str:
@@ -63,11 +64,13 @@ def _symbol_to_ticker(symbol: str) -> str:
 
 
 def default_parquet_path(symbol: str) -> Path:
-    return DEFAULT_DATA_DIR / f"{_symbol_stem(symbol)}.parquet"
+    stem = _symbol_stem(symbol)
+    return DEFAULT_DATA_DIR / stem / "data.parquet"
 
 
 def default_chart_path(symbol: str) -> Path:
-    return DEFAULT_DATA_DIR / f"{_symbol_stem(symbol)}.png"
+    stem = _symbol_stem(symbol)
+    return Path("results") / stem / "chart.png"
 
 
 def download_symbol_history(
@@ -113,3 +116,36 @@ def load_symbol_data(
     if "date" in frame.columns:
         frame["date"] = pd.to_datetime(frame["date"])
     return frame
+
+
+def fetch_symbol(
+    symbol: str,
+    output_path: Path | None = None,
+    start_date: str = DEFAULT_START_DATE,
+) -> Path:
+    frame = download_symbol_history(symbol, start_date)
+    path = output_path or default_parquet_path(symbol)
+    return save_to_parquet(frame, path)
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Fetch market data for a symbol.")
+    parser.add_argument("symbol", choices=[DEFAULT_SYMBOL], help="Supported symbol.")
+    parser.add_argument(
+        "--start-date",
+        default=DEFAULT_START_DATE,
+        help="Start date for the download.",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Where to save the parquet file.",
+    )
+    return parser
+
+
+def main() -> None:
+    args = _build_parser().parse_args()
+    output_path = fetch_symbol(args.symbol, args.output, args.start_date)
+    print(f"Saved data to {output_path}")
